@@ -1,0 +1,443 @@
+/* DualSense Controller Styles - DualSense Edge Design */
+
+/* Theme Variables - Default (White/Blue like the image) */
+.theme-default {
+  --body-light: #f8f8f8;
+  --body-main: #e8e8e8;
+  --body-dark: #d8d8d8;
+
+  --grip-light: #4a90d9;
+  --grip-main: #2563eb;
+  --grip-dark: #1d4ed8;
+
+  --stick-light: #d0d0d0;
+  --stick-dark: #a0a0a0;
+
+  --button-base: #d5d5d5;
+  --button-pressed: #00a8ff;
+  --button-border: #b0b0b0;
+
+  --text-color: #666;
+  --text-active: #fff;
+
+  --led-color: #00d4ff;
+  --led-glow: rgba(0, 212, 255, 0.8);
+  --lightbar-color: #00aaff;
+
+  /* Face button colors - outline style */
+  --triangle-color: #00c4b4;
+  --circle-color: #ff6b6b;
+  --cross-color: #5b9bd5;
+  --square-color: #ff8eb3;
+}
+
+.theme-dark {
+  --body-light: #3a3a3a;
+  --body-main: #2a2a2a;
+  --body-dark: #1a1a1a;
+
+  --grip-light: #4a4a4a;
+  --grip-main: #333;
+  --grip-dark: #222;
+
+  --stick-light: #4a4a4a;
+  --stick-dark: #333;
+
+  --button-base: #3a3a3a;
+  --button-pressed: #00d4ff;
+  --button-border: #555;
+
+  --text-color: #888;
+  --text-active: #fff;
+
+  --led-color: #00d4ff;
+  --led-glow: rgba(0, 212, 255, 0.8);
+  --lightbar-color: #00d4ff;
+
+  --triangle-color: #00d68f;
+  --circle-color: #ff6b6b;
+  --cross-color: #6b9dff;
+  --square-color: #ff9ff3;
+}
+
+.theme-neon {
+  --body-light: #1a0a2e;
+  --body-main: #120820;
+  --body-dark: #0a0412;
+
+  --grip-light: #6b21a8;
+  --grip-main: #7c3aed;
+  --grip-dark: #5b21b6;
+
+  --stick-light: #2d1b4e;
+  --stick-dark: #1a0a2e;
+
+  --button-base: #2d1b4e;
+  --button-pressed: #ff00ff;
+  --button-border: #6b21a8;
+
+  --text-color: #8a6fad;
+  --text-active: #fff;
+
+  --led-color: #ff00ff;
+  --led-glow: rgba(255, 0, 255, 0.8);
+  --lightbar-color: #ff00ff;
+
+  --triangle-color: #00ff88;
+  --circle-color: #ff0055;
+  --cross-color: #00aaff;
+  --square-color: #aa00ff;
+}
+
+/* Container */
+.dualsense-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  transform-origin: center;
+  user-select: none;
+}
+
+.dualsense-svg {
+  width: 520px;
+  height: 340px;
+}
+
+/* Controller Body */
+.controller-body {
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 1;
+}
+
+.grip {
+  transition: filter 0.2s ease;
+}
+
+/* Light Bar */
+.lightbar {
+  fill: var(--lightbar-color);
+  filter: drop-shadow(0 0 8px var(--led-glow));
+  animation: lightbar-pulse 2s ease-in-out infinite;
+}
+
+@keyframes lightbar-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--led-glow));
+  }
+
+  50% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 12px var(--led-glow));
+  }
+}
+
+/* Touchpad */
+.touchpad {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 1;
+  transition: all 0.15s ease;
+}
+
+.touchpad.pressed {
+  filter: brightness(1.3);
+}
+
+/* LED Pattern */
+.led-dot {
+  fill: var(--led-color);
+  opacity: 0.7;
+  animation: led-blink 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 3px var(--led-glow));
+}
+
+@keyframes led-blink {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Triggers */
+.trigger {
+  fill: var(--body-dark);
+  stroke: rgba(0, 0, 0, 0.15);
+  stroke-width: 1;
+  transition: all 0.08s ease;
+}
+
+.trigger.pressed {
+  fill: var(--button-pressed);
+  filter: drop-shadow(0 0 6px var(--led-glow));
+}
+
+.trigger-bar {
+  fill: var(--led-color);
+  opacity: 0.9;
+  transition: width 0.05s linear;
+  filter: drop-shadow(0 0 4px var(--led-glow));
+}
+
+/* Bumpers */
+.bumper {
+  fill: var(--body-dark);
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 1;
+  transition: all 0.08s ease;
+}
+
+.bumper.pressed {
+  fill: var(--button-pressed);
+  filter: drop-shadow(0 0 6px var(--led-glow));
+}
+
+/* D-Pad */
+.dpad-base {
+  fill: var(--body-dark);
+  stroke: rgba(0, 0, 0, 0.08);
+  stroke-width: 1;
+}
+
+.dpad-arrow {
+  fill: var(--button-base);
+  stroke: var(--button-border);
+  stroke-width: 1;
+  transition: all 0.08s ease;
+}
+
+.dpad-arrow.pressed {
+  fill: var(--button-pressed);
+  stroke: var(--button-pressed);
+  filter: drop-shadow(0 0 6px var(--led-glow));
+}
+
+/* Face Buttons - Outline style like the reference image */
+.face-button {
+  fill: var(--button-base);
+  stroke: var(--button-border);
+  stroke-width: 2;
+  transition: all 0.1s ease;
+}
+
+.face-button.pressed {
+  fill: var(--button-pressed);
+  stroke: var(--button-pressed);
+  filter: drop-shadow(0 0 8px var(--led-glow));
+}
+
+/* Face Button Icons - Outline style */
+.face-icon {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.1s ease;
+}
+
+.triangle-icon {
+  stroke: var(--triangle-color);
+}
+
+.circle-icon {
+  stroke: var(--circle-color);
+}
+
+.cross-icon line {
+  stroke: var(--cross-color);
+  stroke-width: 3;
+}
+
+.square-icon {
+  stroke: var(--square-color);
+}
+
+/* Active state - white icons */
+.face-icon.active {
+  stroke: #fff;
+}
+
+.cross-icon.active line {
+  stroke: #fff;
+}
+
+/* Analog Sticks */
+.stick-base {
+  fill: var(--body-dark);
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 1;
+}
+
+.stick-ring {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 2;
+}
+
+.stick {
+  stroke: rgba(0, 0, 0, 0.15);
+  stroke-width: 1;
+  transition: all 0.05s ease;
+  cursor: pointer;
+}
+
+.stick.pressed {
+  fill: var(--button-pressed) !important;
+  filter: drop-shadow(0 0 8px var(--led-glow));
+}
+
+.stick-texture {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.08);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+  pointer-events: none;
+}
+
+/* Special Buttons */
+.special-button {
+  fill: var(--button-base);
+  stroke: var(--button-border);
+  stroke-width: 1;
+  transition: all 0.1s ease;
+}
+
+.special-button.pressed {
+  fill: var(--button-pressed);
+  filter: drop-shadow(0 0 6px var(--led-glow));
+}
+
+/* Mic Button */
+.mic-button {
+  fill: var(--body-dark);
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 1;
+}
+
+.mic-hole {
+  fill: #333;
+}
+
+/* PS Button */
+.ps-button {
+  fill: var(--body-dark);
+  stroke: rgba(0, 0, 0, 0.15);
+  stroke-width: 1;
+  transition: all 0.15s ease;
+}
+
+.ps-button-group.pressed .ps-button {
+  fill: var(--button-pressed);
+  filter: drop-shadow(0 0 10px var(--led-glow));
+}
+
+.ps-logo {
+  font-family: 'PlayStation', sans-serif;
+  font-size: 14px;
+  fill: var(--text-color);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.ps-text {
+  font-family: 'Inter', 'SF Pro', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  fill: var(--text-color);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.ps-button-group.pressed .ps-text {
+  fill: #fff;
+}
+
+/* USB Port */
+.usb-port {
+  fill: #333;
+}
+
+/* Connection Status */
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-family: 'Inter', 'SF Pro', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.connection-status.connected {
+  background: rgba(0, 200, 100, 0.12);
+  color: #00c864;
+  border: 1px solid rgba(0, 200, 100, 0.25);
+  box-shadow: 0 0 20px rgba(0, 200, 100, 0.1);
+}
+
+.connection-status.disconnected {
+  background: rgba(100, 100, 120, 0.12);
+  color: #888;
+  border: 1px solid rgba(100, 100, 120, 0.25);
+  animation: pulse-disconnected 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-disconnected {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+
+.connected .status-dot {
+  background: #00c864;
+  box-shadow: 0 0 12px rgba(0, 200, 100, 0.7);
+}
+
+.disconnected .status-dot {
+  background: #666;
+  box-shadow: 0 0 8px rgba(100, 100, 100, 0.4);
+}
+
+@keyframes dot-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .dualsense-svg {
+    width: 100%;
+    height: auto;
+  }
+}

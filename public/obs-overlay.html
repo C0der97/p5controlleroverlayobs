@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PS5 Input Overlay - OBS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: transparent !important;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      gap: 16px;
+    }
+
+    /* Theme Selector */
+    .theme-selector {
+      display: flex;
+      gap: 12px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .theme-selector label {
+      color: #888;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .theme-selector select {
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 4px 24px 4px 8px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23888' d='M2 3l3 4 3-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+    }
+
+    .theme-selector select:focus {
+      outline: none;
+      border-color: var(--led-color);
+    }
+
+    .dualsense-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dualsense-svg {
+      width: 480px;
+      height: 320px;
+    }
+
+    /* Theme: Default (DualSense Edge - White/Blue) */
+    body.theme-default {
+      --body-light: #f8f8f8;
+      --body-main: #e8e8e8;
+      --body-dark: #d8d8d8;
+      --grip-light: #4a90d9;
+      --grip-main: #2563eb;
+      --grip-dark: #1d4ed8;
+      --stick-light: #d0d0d0;
+      --stick-dark: #a0a0a0;
+      --button-base: #d5d5d5;
+      --button-pressed: #00a8ff;
+      --button-border: #b0b0b0;
+      --led-color: #00d4ff;
+      --lightbar-color: #00aaff;
+      --triangle-color: #00c4b4;
+      --circle-color: #ff6b6b;
+      --cross-color: #5b9bd5;
+      --square-color: #ff8eb3;
+      --glow-color: rgba(0, 212, 255, 0.8);
+    }
+
+    /* Theme: Dark */
+    body.theme-dark {
+      --body-light: #3a3a3a;
+      --body-main: #2a2a2a;
+      --body-dark: #1a1a1a;
+      --grip-light: #4a4a4a;
+      --grip-main: #333;
+      --grip-dark: #222;
+      --stick-light: #4a4a4a;
+      --stick-dark: #333;
+      --button-base: #3a3a3a;
+      --button-pressed: #00d4ff;
+      --button-border: #555;
+      --led-color: #00d4ff;
+      --lightbar-color: #00d4ff;
+      --triangle-color: #00d68f;
+      --circle-color: #ff6b6b;
+      --cross-color: #6b9dff;
+      --square-color: #ff9ff3;
+      --glow-color: rgba(0, 212, 255, 0.8);
+    }
+
+    /* Theme: Neon */
+    body.theme-neon {
+      --body-light: #1a0a2e;
+      --body-main: #120820;
+      --body-dark: #0a0412;
+      --grip-light: #6b21a8;
+      --grip-main: #7c3aed;
+      --grip-dark: #5b21b6;
+      --stick-light: #2d1b4e;
+      --stick-dark: #1a0a2e;
+      --button-base: #2d1b4e;
+      --button-pressed: #ff00ff;
+      --button-border: #6b21a8;
+      --led-color: #ff00ff;
+      --lightbar-color: #ff00ff;
+      --triangle-color: #00ff88;
+      --circle-color: #ff0055;
+      --cross-color: #00aaff;
+      --square-color: #aa00ff;
+      --glow-color: rgba(255, 0, 255, 0.8);
+    }
+
+    .controller-body {
+      stroke: rgba(0, 0, 0, 0.1);
+      stroke-width: 1;
+    }
+
+    .lightbar {
+      fill: var(--lightbar-color);
+      filter: drop-shadow(0 0 8px var(--glow-color));
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.7
+      }
+    }
+
+    .touchpad {
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 1;
+    }
+
+    .touchpad.pressed {
+      filter: brightness(1.3);
+    }
+
+    .led-dot {
+      fill: var(--led-color);
+      opacity: 0.7;
+      animation: led 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 3px var(--glow-color));
+    }
+
+    @keyframes led {
+
+      0%,
+      100% {
+        opacity: 0.5
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
+
+    .trigger,
+    .bumper {
+      fill: var(--body-dark);
+      stroke: rgba(0, 0, 0, 0.15);
+      stroke-width: 1;
+      transition: all 0.08s ease;
+    }
+
+    .trigger.pressed,
+    .bumper.pressed {
+      fill: var(--button-pressed);
+      filter: drop-shadow(0 0 6px var(--glow-color));
+    }
+
+    .trigger-bar {
+      fill: var(--led-color);
+      filter: drop-shadow(0 0 4px var(--glow-color));
+      transition: width 0.05s linear;
+    }
+
+    .dpad-base {
+      fill: var(--body-dark);
+    }
+
+    .dpad-arrow {
+      fill: var(--button-base);
+      stroke: var(--button-border);
+      stroke-width: 1;
+      transition: all 0.08s ease;
+    }
+
+    .dpad-arrow.pressed {
+      fill: var(--button-pressed);
+      stroke: var(--button-pressed);
+      filter: drop-shadow(0 0 6px var(--glow-color));
+    }
+
+    .face-button {
+      fill: var(--button-base);
+      stroke: var(--button-border);
+      stroke-width: 2;
+      transition: all 0.1s ease;
+    }
+
+    .face-button.pressed {
+      fill: var(--button-pressed);
+      stroke: var(--button-pressed);
+      filter: drop-shadow(0 0 8px var(--glow-color));
+    }
+
+    .face-icon {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .triangle-icon {
+      stroke: var(--triangle-color);
+    }
+
+    .circle-icon {
+      stroke: var(--circle-color);
+    }
+
+    .cross-icon line {
+      stroke: var(--cross-color);
+      stroke-width: 3;
+    }
+
+    .square-icon {
+      stroke: var(--square-color);
+    }
+
+    .face-icon.active,
+    .cross-icon.active line {
+      stroke: #fff;
+    }
+
+    .stick-base {
+      fill: var(--body-dark);
+    }
+
+    .stick-ring {
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.1);
+      stroke-width: 2;
+    }
+
+    .stick {
+      stroke: rgba(0, 0, 0, 0.15);
+      stroke-width: 1;
+      transition: all 0.05s ease;
+    }
+
+    .stick.pressed {
+      fill: var(--button-pressed) !important;
+      filter: drop-shadow(0 0 8px var(--glow-color));
+    }
+
+    .stick-texture {
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.08);
+      stroke-width: 1;
+      stroke-dasharray: 2 2;
+    }
+
+    .special-button,
+    .ps-button {
+      fill: var(--body-dark);
+      stroke: rgba(0, 0, 0, 0.1);
+      stroke-width: 1;
+      transition: all 0.1s ease;
+    }
+
+    .special-button.pressed,
+    .ps-button.pressed {
+      fill: var(--button-pressed);
+      filter: drop-shadow(0 0 6px var(--glow-color));
+    }
+
+    .mic-button {
+      fill: var(--body-dark);
+    }
+
+    .mic-hole {
+      fill: #333;
+    }
+
+    .usb-port {
+      fill: #333;
+    }
+
+    .ps-text {
+      font-size: 9px;
+      font-weight: 700;
+      fill: #666;
+      text-anchor: middle;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      backdrop-filter: blur(8px);
+    }
+
+    .connection-status.connected {
+      background: rgba(0, 200, 100, 0.12);
+      color: #00c864;
+      border: 1px solid rgba(0, 200, 100, 0.25);
+    }
+
+    .connection-status.disconnected {
+      background: rgba(100, 100, 120, 0.12);
+      color: #888;
+      border: 1px solid rgba(100, 100, 120, 0.25);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .connected .status-dot {
+      background: #00c864;
+      box-shadow: 0 0 10px rgba(0, 200, 100, 0.7);
+    }
+
+    .disconnected .status-dot {
+      background: #666;
+    }
+  </style>
+</head>
+
+<body class="theme-default">
+  <!-- Theme Selector -->
+  <div class="theme-selector">
+    <label>Tema:</label>
+    <select id="theme-select">
+      <option value="default">DualSense Edge</option>
+      <option value="dark">Oscuro</option>
+      <option value="neon">Neon</option>
+    </select>
+  </div>
+
+  <div class="dualsense-container" id="controller">
+    <svg viewBox="0 0 520 340" class="dualsense-svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="var(--body-light)" />
+          <stop offset="50%" stop-color="var(--body-main)" />
+          <stop offset="100%" stop-color="var(--body-dark)" />
+        </linearGradient>
+        <linearGradient id="gripGradientLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="var(--grip-dark)" />
+          <stop offset="50%" stop-color="var(--grip-main)" />
+          <stop offset="100%" stop-color="var(--grip-light)" />
+        </linearGradient>
+        <linearGradient id="gripGradientRight" x1="100%" y1="0%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="var(--grip-dark)" />
+          <stop offset="50%" stop-color="var(--grip-main)" />
+          <stop offset="100%" stop-color="var(--grip-light)" />
+        </linearGradient>
+        <linearGradient id="touchpadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1a1a1a" />
+          <stop offset="100%" stop-color="#0a0a0a" />
+        </linearGradient>
+        <linearGradient id="stickGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="var(--stick-light)" />
+          <stop offset="100%" stop-color="var(--stick-dark)" />
+        </linearGradient>
+        <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3" />
+        </filter>
+        <clipPath id="touchpadClip">
+          <rect x="185" y="95" width="150" height="75" rx="12" />
+        </clipPath>
+      </defs>
+
+      <!-- Controller Body -->
+      <g filter="url(#softShadow)">
+        <path
+          d="M 50,140 C 30,160 25,200 35,250 C 45,300 80,330 120,335 C 150,338 170,320 185,290 L 200,250 C 210,220 240,200 260,200 C 280,200 310,220 320,250 L 335,290 C 350,320 370,338 400,335 C 440,330 475,300 485,250 C 495,200 490,160 470,140 C 440,100 380,70 260,70 C 140,70 80,100 50,140 Z"
+          fill="url(#bodyGradient)" class="controller-body" />
+        <path
+          d="M 35,250 C 25,200 30,160 50,140 C 60,128 75,118 95,112 L 105,115 C 80,130 65,160 60,200 C 55,240 65,280 85,310 L 75,315 C 50,300 42,280 35,250 Z"
+          fill="url(#gripGradientLeft)" />
+        <path
+          d="M 485,250 C 495,200 490,160 470,140 C 460,128 445,118 425,112 L 415,115 C 440,130 455,160 460,200 C 465,240 455,280 435,310 L 445,315 C 470,300 478,280 485,250 Z"
+          fill="url(#gripGradientRight)" />
+      </g>
+
+      <!-- Triggers -->
+      <rect id="l2" x="80" y="58" width="65" height="22" rx="6" class="trigger" />
+      <rect id="l2-bar" x="82" y="82" width="0" height="5" rx="2" class="trigger-bar" />
+      <rect id="r2" x="375" y="58" width="65" height="22" rx="6" class="trigger" />
+      <rect id="r2-bar" x="377" y="82" width="0" height="5" rx="2" class="trigger-bar" />
+
+      <!-- Bumpers -->
+      <rect id="l1" x="80" y="90" width="65" height="16" rx="5" class="bumper" />
+      <rect id="r1" x="375" y="90" width="65" height="16" rx="5" class="bumper" />
+
+      <!-- Touchpad with LEDs -->
+      <rect x="185" y="95" width="150" height="75" rx="12" class="touchpad" id="touchpad"
+        fill="url(#touchpadGradient)" />
+      <g class="led-pattern" clip-path="url(#touchpadClip)" id="leds"></g>
+      <line x1="260" y1="100" x2="260" y2="165" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+
+      <!-- D-Pad -->
+      <circle cx="130" cy="175" r="35" class="dpad-base" />
+      <path id="dpad-up" d="M 120,150 L 140,150 L 140,165 L 145,165 L 130,145 L 115,165 L 120,165 Z"
+        class="dpad-arrow" />
+      <path id="dpad-down" d="M 120,200 L 140,200 L 140,185 L 145,185 L 130,205 L 115,185 L 120,185 Z"
+        class="dpad-arrow" />
+      <path id="dpad-left" d="M 100,165 L 100,185 L 115,185 L 115,190 L 95,175 L 115,160 L 115,165 Z"
+        class="dpad-arrow" />
+      <path id="dpad-right" d="M 160,165 L 160,185 L 145,185 L 145,190 L 165,175 L 145,160 L 145,165 Z"
+        class="dpad-arrow" />
+
+      <!-- Face Buttons -->
+      <circle id="triangle-btn" cx="405" cy="130" r="17" class="face-button" />
+      <polygon id="triangle-icon" points="405,117 394,140 416,140" class="face-icon triangle-icon" />
+      <circle id="circle-btn" cx="435" cy="160" r="17" class="face-button" />
+      <circle cx="435" cy="160" r="9" class="face-icon circle-icon" id="circle-icon" />
+      <circle id="cross-btn" cx="405" cy="190" r="17" class="face-button" />
+      <g class="face-icon cross-icon" id="cross-icon">
+        <line x1="397" y1="182" x2="413" y2="198" />
+        <line x1="413" y1="182" x2="397" y2="198" />
+      </g>
+      <circle id="square-btn" cx="375" cy="160" r="17" class="face-button" />
+      <rect x="367" y="152" width="16" height="16" rx="1" class="face-icon square-icon" id="square-icon" />
+
+      <!-- Analog Sticks -->
+      <circle cx="170" cy="235" r="32" class="stick-base" />
+      <circle cx="170" cy="235" r="28" class="stick-ring" />
+      <circle id="left-stick" cx="170" cy="235" r="22" class="stick" fill="url(#stickGradient)" />
+      <circle id="left-stick-texture" cx="170" cy="235" r="18" class="stick-texture" />
+
+      <circle cx="350" cy="235" r="32" class="stick-base" />
+      <circle cx="350" cy="235" r="28" class="stick-ring" />
+      <circle id="right-stick" cx="350" cy="235" r="22" class="stick" fill="url(#stickGradient)" />
+      <circle id="right-stick-texture" cx="350" cy="235" r="18" class="stick-texture" />
+
+      <!-- Special Buttons -->
+      <ellipse id="create" cx="165" cy="115" rx="12" ry="8" class="special-button" />
+      <ellipse id="options" cx="355" cy="115" rx="12" ry="8" class="special-button" />
+
+      <!-- Mic -->
+      <rect x="252" y="175" width="16" height="12" rx="3" class="mic-button" />
+      <circle cx="256" cy="181" r="1.5" class="mic-hole" />
+      <circle cx="260" cy="181" r="1.5" class="mic-hole" />
+      <circle cx="264" cy="181" r="1.5" class="mic-hole" />
+
+      <!-- PS Button -->
+      <circle id="ps" cx="260" cy="275" r="16" class="ps-button" />
+      <text x="260" y="280" class="ps-text">PS</text>
+
+      <!-- USB Port -->
+      <rect x="255" y="295" width="10" height="4" rx="1" class="usb-port" />
+
+      <!-- Light bar -->
+      <rect x="190" y="72" width="140" height="5" rx="2" class="lightbar" />
+    </svg>
+
+    <div id="status" class="connection-status disconnected">
+      <span class="status-dot"></span>
+      <span id="status-text">Conecta tu control</span>
+    </div>
+  </div>
+
+  <script>
+    // Theme selector
+    const themeSelect = document.getElementById('theme-select');
+    themeSelect.addEventListener('change', (e) => {
+      document.body.className = `theme-${e.target.value}`;
+      localStorage.setItem('obs-overlay-theme', e.target.value);
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('obs-overlay-theme');
+    if (savedTheme) {
+      themeSelect.value = savedTheme;
+      document.body.className = `theme-${savedTheme}`;
+    }
+
+    // Generate LED dots
+    const ledsGroup = document.getElementById('leds');
+    for (let cluster = 0; cluster < 2; cluster++) {
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 6; col++) {
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', (cluster === 0 ? 210 : 280) + col * 8);
+          circle.setAttribute('cy', 112 + row * 7);
+          circle.setAttribute('r', '2');
+          circle.setAttribute('class', 'led-dot');
+          circle.style.animationDelay = `${(row + col) * 0.05 + cluster * 0.3}s`;
+          ledsGroup.appendChild(circle);
+        }
+      }
+    }
+
+    const el = {
+      crossBtn: document.getElementById('cross-btn'),
+      crossIcon: document.getElementById('cross-icon'),
+      circleBtn: document.getElementById('circle-btn'),
+      circleIcon: document.getElementById('circle-icon'),
+      squareBtn: document.getElementById('square-btn'),
+      squareIcon: document.getElementById('square-icon'),
+      triangleBtn: document.getElementById('triangle-btn'),
+      triangleIcon: document.getElementById('triangle-icon'),
+      l1: document.getElementById('l1'),
+      r1: document.getElementById('r1'),
+      l2: document.getElementById('l2'),
+      r2: document.getElementById('r2'),
+      l2Bar: document.getElementById('l2-bar'),
+      r2Bar: document.getElementById('r2-bar'),
+      dpadUp: document.getElementById('dpad-up'),
+      dpadDown: document.getElementById('dpad-down'),
+      dpadLeft: document.getElementById('dpad-left'),
+      dpadRight: document.getElementById('dpad-right'),
+      leftStick: document.getElementById('left-stick'),
+      leftStickTexture: document.getElementById('left-stick-texture'),
+      rightStick: document.getElementById('right-stick'),
+      rightStickTexture: document.getElementById('right-stick-texture'),
+      create: document.getElementById('create'),
+      options: document.getElementById('options'),
+      touchpad: document.getElementById('touchpad'),
+      ps: document.getElementById('ps'),
+      status: document.getElementById('status'),
+      statusText: document.getElementById('status-text')
+    };
+
+    let wasConnected = false;
+
+    function applyDeadzone(value, threshold = 0.1) {
+      return Math.abs(value) < threshold ? 0 : value;
+    }
+
+    function toggle(element, className, condition) {
+      element.classList.toggle(className, condition);
+    }
+
+    function updateController() {
+      const gamepads = navigator.getGamepads();
+      const gp = gamepads[0];
+
+      if (!gp) {
+        if (wasConnected) {
+          el.status.className = 'connection-status disconnected';
+          el.statusText.textContent = 'Conecta tu control';
+          wasConnected = false;
+        }
+        requestAnimationFrame(updateController);
+        return;
+      }
+
+      if (!wasConnected) {
+        el.status.className = 'connection-status connected';
+        el.statusText.textContent = 'Conectado';
+        wasConnected = true;
+      }
+
+      const b = gp.buttons, a = gp.axes;
+
+      // Face buttons
+      toggle(el.crossBtn, 'pressed', b[0]?.pressed);
+      toggle(el.crossIcon, 'active', b[0]?.pressed);
+      toggle(el.circleBtn, 'pressed', b[1]?.pressed);
+      toggle(el.circleIcon, 'active', b[1]?.pressed);
+      toggle(el.squareBtn, 'pressed', b[2]?.pressed);
+      toggle(el.squareIcon, 'active', b[2]?.pressed);
+      toggle(el.triangleBtn, 'pressed', b[3]?.pressed);
+      toggle(el.triangleIcon, 'active', b[3]?.pressed);
+
+      // Bumpers & Triggers
+      toggle(el.l1, 'pressed', b[4]?.pressed);
+      toggle(el.r1, 'pressed', b[5]?.pressed);
+      toggle(el.l2, 'pressed', b[6]?.pressed);
+      toggle(el.r2, 'pressed', b[7]?.pressed);
+      el.l2Bar.setAttribute('width', 61 * (b[6]?.value || 0));
+      el.r2Bar.setAttribute('width', 61 * (b[7]?.value || 0));
+
+      // D-Pad
+      toggle(el.dpadUp, 'pressed', b[12]?.pressed);
+      toggle(el.dpadDown, 'pressed', b[13]?.pressed);
+      toggle(el.dpadLeft, 'pressed', b[14]?.pressed);
+      toggle(el.dpadRight, 'pressed', b[15]?.pressed);
+
+      // Sticks
+      const lx = applyDeadzone(a[0] || 0), ly = applyDeadzone(a[1] || 0);
+      const rx = applyDeadzone(a[2] || 0), ry = applyDeadzone(a[3] || 0);
+
+      el.leftStick.setAttribute('cx', 170 + lx * 12);
+      el.leftStick.setAttribute('cy', 235 + ly * 12);
+      el.leftStickTexture.setAttribute('cx', 170 + lx * 12);
+      el.leftStickTexture.setAttribute('cy', 235 + ly * 12);
+
+      el.rightStick.setAttribute('cx', 350 + rx * 12);
+      el.rightStick.setAttribute('cy', 235 + ry * 12);
+      el.rightStickTexture.setAttribute('cx', 350 + rx * 12);
+      el.rightStickTexture.setAttribute('cy', 235 + ry * 12);
+
+      toggle(el.leftStick, 'pressed', b[10]?.pressed);
+      toggle(el.rightStick, 'pressed', b[11]?.pressed);
+
+      // Special
+      toggle(el.create, 'pressed', b[8]?.pressed);
+      toggle(el.options, 'pressed', b[9]?.pressed);
+      toggle(el.touchpad, 'pressed', b[17]?.pressed);
+      toggle(el.ps, 'pressed', b[16]?.pressed);
+
+      requestAnimationFrame(updateController);
+    }
+
+    requestAnimationFrame(updateController);
+
+    window.addEventListener('gamepadconnected', () => {
+      el.status.className = 'connection-status connected';
+      el.statusText.textContent = 'Conectado';
+      wasConnected = true;
+    });
+
+    window.addEventListener('gamepaddisconnected', () => {
+      el.status.className = 'connection-status disconnected';
+      el.statusText.textContent = 'Conecta tu control';
+      wasConnected = false;
+    });
+  </script>
+</body>
+
+</html>
