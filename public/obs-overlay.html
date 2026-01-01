@@ -508,18 +508,40 @@
   </div>
 
   <script>
-    // Theme selector
-    const themeSelect = document.getElementById('theme-select');
-    themeSelect.addEventListener('change', (e) => {
-      document.body.className = `theme-${e.target.value}`;
-      localStorage.setItem('obs-overlay-theme', e.target.value);
-    });
+    // Read URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTheme = urlParams.get('theme'); // ?theme=dark, ?theme=neon, ?theme=default
+    const hideUI = urlParams.get('hideUI') === 'true'; // ?hideUI=true
 
-    // Load saved theme
-    const savedTheme = localStorage.getItem('obs-overlay-theme');
-    if (savedTheme) {
-      themeSelect.value = savedTheme;
-      document.body.className = `theme-${savedTheme}`;
+    // Theme selector element
+    const themeSelect = document.getElementById('theme-select');
+    const themeSelector = document.querySelector('.theme-selector');
+
+    // Hide UI if requested via URL
+    if (hideUI && themeSelector) {
+      themeSelector.style.display = 'none';
+    }
+
+    // Apply theme from URL, localStorage, or default
+    let activeTheme = urlTheme || localStorage.getItem('obs-overlay-theme') || 'default';
+
+    // Validate theme
+    if (!['default', 'dark', 'neon'].includes(activeTheme)) {
+      activeTheme = 'default';
+    }
+
+    // Apply theme
+    document.body.className = `theme-${activeTheme}`;
+    if (themeSelect) {
+      themeSelect.value = activeTheme;
+    }
+
+    // Save theme when changed via dropdown
+    if (themeSelect) {
+      themeSelect.addEventListener('change', (e) => {
+        document.body.className = `theme-${e.target.value}`;
+        localStorage.setItem('obs-overlay-theme', e.target.value);
+      });
     }
 
     // Generate LED dots
