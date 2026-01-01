@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build Windows Release
 
 on:
   push:
@@ -6,22 +6,12 @@ on:
       - 'v*'
   workflow_dispatch:
 
-jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: 'macos-latest'
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest'
-            args: '--target x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04'
-            args: ''
-          - platform: 'windows-latest'
-            args: ''
+permissions:
+  contents: write
 
-    runs-on: ${{ matrix.platform }}
+jobs:
+  build-windows:
+    runs-on: windows-latest
     
     steps:
       - name: Checkout repository
@@ -34,14 +24,6 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-
-      - name: Install dependencies (Ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libgtk-3-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
 
       - name: Install frontend dependencies
         run: npm install
@@ -52,14 +34,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'PS5 Input Overlay v__VERSION__'
+          releaseName: 'PS5 Input Overlay ${{ github.ref_name }}'
           releaseBody: |
             ## 🎮 PS5 Input Overlay
             
-            Descarga el instalador para tu sistema operativo:
-            - **Windows**: `.msi` o `.exe`
-            - **macOS**: `.dmg`
-            - **Linux**: `.deb`, `.rpm` o `.AppImage`
-          releaseDraft: true
+            ### Descargas:
+            - **Windows Installer**: `ps5-input-overlay_x64-setup.exe`
+            - **Windows MSI**: `ps5-input-overlay_x64_en-US.msi`
+            
+            ### Instrucciones:
+            1. Descarga el instalador
+            2. Ejecuta e instala
+            3. Conecta tu control DualSense (USB o Bluetooth)
+            4. ¡Abre la app y disfruta!
+          releaseDraft: false
           prerelease: false
-          args: ${{ matrix.args }}
