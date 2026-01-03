@@ -7,7 +7,7 @@ Aplicación para mostrar visualmente los inputs del control DualSense (PS5) en t
 ## ✨ Características
 
 - 🎮 Visualización completa del DualSense (botones, joysticks, gatillos analógicos)
-- 🎨 3 Temas: DualSense Edge (blanco/azul), Oscuro, Neon
+- 🎨 4 Temas: DualSense Edge, Oscuro, Neon, Realista
 - 📏 Escala ajustable (50% - 150%)
 - ✨ Animaciones de glow al presionar botones
 - 📺 Página standalone para OBS Browser Source
@@ -169,6 +169,14 @@ sudo apt-get install -y pkg-config libglib2.0-dev libwebkit2gtk-4.1-dev librsvg2
 3. URL: `http://localhost:1420/obs-overlay.html`
 4. Dimensiones: **520 x 400**
 5. Selecciona tu tema en el dropdown
+
+### URL Recomendada para Streaming
+
+Para usar el tema **Realista** (botones rojos al presionar, fondo transparente):
+
+```
+http://localhost:1420/obs-overlay.html?theme=realistic&hideUI=true
+```
 
 ---
 
